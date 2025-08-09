@@ -317,6 +317,7 @@ public class Unobfuscator {
     public synchronized static Method loadHideViewInChatMethod(ClassLoader classLoader) throws Exception {
         return UnobfuscatorCache.getInstance().getMethod(classLoader, () -> {
             Method method = findFirstMethodUsingStrings(classLoader, StringMatchType.Contains, "ReadReceipts/acknowledgeMessageIfNeeded");
+            if (method == null) method = findFirstMethodUsingStrings(classLoader, StringMatchType.Contains, "ReadReceipts/sendDeliveryReceiptIfNotRetry");
             if (method == null) throw new Exception("HideViewInChat method not found");
             return method;
         });
@@ -1230,6 +1231,8 @@ public class Unobfuscator {
             var methodSeduleche = XposedHelpers.findMethodBestMatch(Timer.class, "schedule", TimerTask.class, long.class, long.class);
             var result = dexkit.findMethod(new FindMethod().searchInClass(List.of(clazzData)).matcher(new MethodMatcher().addInvoke(DexSignUtil.getMethodDescriptor(methodSeduleche))));
             if (result.isEmpty())
+                result = dexkit.findMethod(new FindMethod().searchInClass(List.of(clazzData)).matcher(new MethodMatcher().addUsingString("UpdatesViewModel/Scheduled updates list refresh")));
+            if (result.isEmpty())
                 throw new RuntimeException("OnUpdateStatusChanged method not found");
             return result.get(0).getMethodInstance(loader);
         });
@@ -1395,7 +1398,8 @@ public class Unobfuscator {
     }
 
     public synchronized static Method loadCheckOnlineMethod(ClassLoader loader) throws Exception {
-        var method = findFirstMethodUsingStrings(loader, StringMatchType.Contains, "app/xmpp/recv/handle_available");
+        var method = findFirstMethodUsingStrings(loader, StringMatchType.Contains, "MessageHandler/handleConnectionThreadReady connectionready");
+        if (method == null) method = findFirstMethodUsingStrings(loader, StringMatchType.Contains, "app/xmpp/recv/handle_available");
         if (method == null) throw new RuntimeException("CheckOnline method not found");
         return method;
     }
@@ -1456,7 +1460,8 @@ public class Unobfuscator {
 
     public synchronized static Class getFilterView(ClassLoader loader) throws Exception {
         return UnobfuscatorCache.getInstance().getClass(loader, () -> {
-            var results = dexkit.findClass(new FindClass().matcher(new ClassMatcher().addMethod(new MethodMatcher().name("setInboxFilterHelper"))));
+            var filter_id = Utils.getID("conversations_swipe_to_reveal_filters_stub", "id");
+            var results = dexkit.findClass(FindClass.create().matcher(ClassMatcher.create().addMethod(MethodMatcher.create().addUsingNumber(filter_id))));
             if (results.isEmpty()) throw new RuntimeException("FilterView class not found");
             return results.get(0).getInstance(loader);
         });
@@ -1723,6 +1728,7 @@ public class Unobfuscator {
             return methodResult;
         });
     }
+
     public synchronized static Method loadSenderPlayedBusiness(ClassLoader classLoader) throws Exception {
         return UnobfuscatorCache.getInstance().getMethod(classLoader, () -> {
             var loadSenderPlayed = loadSenderPlayedClass(classLoader);
@@ -1904,6 +1910,14 @@ public class Unobfuscator {
                     MethodMatcher.create().addUsingNumber(Utils.getID("invisible_height_placeholder", "id"))
                             .addUsingNumber(Utils.getID("container_view", "id"))
             ));
+            if (methodList.isEmpty()) {
+                var applyClazz = findFirstClassUsingStrings(classLoader, StringMatchType.Contains, "has_seen_detected_outcomes_nux");
+                if (applyClazz != null) {
+                    methodList = dexkit.findMethod(FindMethod.create().matcher(
+                            MethodMatcher.create().paramTypes(View.class, applyClazz)
+                    ));
+                }
+            }
             if (methodList.isEmpty()) throw new RuntimeException("FilterItemClass Not Found");
             return methodList.get(0).getClassInstance(classLoader);
         });
@@ -1919,7 +1933,12 @@ public class Unobfuscator {
     }
 
     public static Class<?> loadRefreshStatusClass(ClassLoader classLoader) throws Exception {
-        return UnobfuscatorCache.getInstance().getClass(classLoader, () -> findFirstClassUsingStrings(classLoader, StringMatchType.Contains, "Report tab open only once per session"));
+        return UnobfuscatorCache.getInstance().getClass(classLoader, () -> {
+            MethodDataList methods = dexkit.findMethod(FindMethod.create().matcher(MethodMatcher.create().addUsingNumber(8126).addUsingNumber(11917)));
+            if (methods.isEmpty())
+                throw new Exception("Refresh Status Class Not Found!");
+            return methods.get(0).getClassInstance(classLoader);
+        });
     }
 
     public static Method loadTcTokenMethod(ClassLoader classLoader) throws Exception {
