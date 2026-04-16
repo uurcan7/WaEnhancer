@@ -9,7 +9,7 @@ import android.hardware.SensorEventListener;
 import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.Menu;
-import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
@@ -227,25 +227,39 @@ public class Unobfuscator {
 
     // TODO: Classes and Methods for Receipt
 
-    public synchronized static Method loadReceiptMethod(ClassLoader classLoader) throws Exception {
+    public static Method loadReceiptMethod(ClassLoader classLoader) throws Exception {
         return UnobfuscatorCache.getInstance().getMethod(classLoader, () -> {
-            var classDeviceJid = Unobfuscator.findFirstClassUsingName(classLoader, StringMatchType.EndsWith,
-                    "jid.DeviceJid");
-            var classPhoneUserJid = Unobfuscator.findFirstClassUsingName(classLoader, StringMatchType.EndsWith,
-                    "jid.PhoneUserJid");
+            var classDeviceJid = Unobfuscator.findFirstClassUsingName(
+                    classLoader, StringMatchType.EndsWith, "jid.DeviceJid");
+            var classPhoneUserJid = Unobfuscator.findFirstClassUsingName(
+                    classLoader, StringMatchType.EndsWith, "jid.PhoneUserJid");
+            var classProtocolTreeNode = findFirstClassUsingStrings(
+                    classLoader, StringMatchType.Contains, "ProtocolTreeNode/getAttributeJid");
+
             var methods = dexkit.findMethod(
                     FindMethod.create()
                             .matcher(MethodMatcher.create()
                                     .addUsingString("receipt")
-                                    .paramCount(5, 8)));
+                                    .returnType(classProtocolTreeNode))
+            );
 
             for (var method : methods) {
                 var params = method.getParamTypeNames();
-                if (params.contains(classDeviceJid.getName()) && params.contains(classPhoneUserJid.getName()))
-                    return method.getMethodInstance(classLoader);
+
+                boolean hasRequiredParams =
+                        params.contains(classDeviceJid.getName()) &&
+                                params.contains(classPhoneUserJid.getName());
+
+                if (!hasRequiredParams) continue;
+
+                return method.getMethodInstance(classLoader);
             }
 
-            throw new NoSuchMethodError("Receipt method not found");
+            throw new NoSuchMethodError(
+                    "Receipt method not found. returnType=" + classProtocolTreeNode.getName()
+                            + ", requiredParams=[" + classDeviceJid.getName()
+                            + ", " + classPhoneUserJid.getName() + "]"
+            );
         });
     }
 
@@ -780,14 +794,19 @@ public class Unobfuscator {
      */
     public synchronized static Method loadViewOnceDownloadMenuMethod(ClassLoader classLoader) throws Exception {
         return UnobfuscatorCache.getInstance().getMethod(classLoader, () -> {
-            var clazz = XposedHelpers.findClass("com.whatsapp.mediaview.MediaViewFragment", classLoader);
-            var method = Arrays.stream(clazz.getDeclaredMethods()).filter(m -> m.getParameterCount() == 2 &&
-                    Objects.equals(m.getParameterTypes()[0], Menu.class) &&
-                    Objects.equals(m.getParameterTypes()[1], MenuInflater.class) &&
-                    m.getDeclaringClass() == clazz).findFirst();
-            if (!method.isPresent())
-                throw new Exception("ViewOnceDownloadMenu method not found");
-            return method.get();
+            var id1 = Utils.getID("ic_viewonce", "drawable");
+            var setShowAsAction = MenuItem.class.getDeclaredMethod("setShowAsAction", int.class);
+            var methodData = dexkit.findMethod(
+                    FindMethod.create().matcher(MethodMatcher.create()
+                            .addUsingNumber(id1)
+                            .addInvoke(DexSignUtil.getMethodDescriptor(setShowAsAction))
+                    )
+            );
+            var result = methodData.stream().filter(m -> m.getParamCount() > 1 &&
+                    m.getParamTypeNames().contains(Menu.class.getName())
+            ).findFirst();
+            if (!result.isPresent()) throw new Exception("ViewOnceDownloadMenu method not found");
+            return result.get().getMethodInstance(classLoader);
         });
     }
 
@@ -924,22 +943,19 @@ public class Unobfuscator {
         });
     }
 
-    public synchronized static Class<?> loadConversationRowClass(ClassLoader loader) throws Exception {
+
+    public static Class<?> loadConversationRowClass(ClassLoader loader) throws Exception {
         return UnobfuscatorCache.getInstance().getClass(loader, () -> {
-            var clazz = findFirstClassUsingStrings(loader, StringMatchType.Contains,
-                    "ConversationRow/setupUserNameInGroupView/");
-            if (clazz != null)
-                return clazz;
-            var conversation_header = Utils.getID("conversation_row_participant_header_view_stub", "id");
-            var nameId = Utils.getID("name_in_group", "id");
-            var classData = dexkit
-                    .findClass(FindClass.create()
-                            .matcher(ClassMatcher.create().addMethod(
-                                    MethodMatcher.create().addUsingNumber(conversation_header).addUsingNumber(nameId))))
-                    .singleOrNull();
-            if (classData == null)
-                throw new Exception("ConversationRow class not found");
-            return classData.getInstance(loader);
+            var clazz = findFirstClassUsingStrings(loader, StringMatchType.Contains, "ConversationRow/setupUserNameInGroupView/");
+            if (clazz != null) return clazz;
+            var conversation_header = Utils.getID("name_in_group", "id");
+            var classData = dexkit.findClass(FindClass.create().matcher(ClassMatcher.create().addMethod(MethodMatcher.create().addUsingNumber(conversation_header))));
+            for (ClassData c : classData) {
+                var clazzInstance = c.getInstance(loader);
+                if (ViewGroup.class.isAssignableFrom(clazzInstance))
+                    return clazzInstance;
+            }
+            return null;
         });
     }
 
@@ -1582,36 +1598,6 @@ public class Unobfuscator {
         });
     }
 
-    public synchronized static Method loadGetIntPreferences(ClassLoader loader) throws Exception {
-        return UnobfuscatorCache.getInstance().getMethod(loader, () -> {
-            var methodList = dexkit.findMethod(new FindMethod().matcher(
-                    new MethodMatcher().paramCount(2).addParamType(SharedPreferences.class).addParamType(String.class)
-                            .modifiers(Modifier.STATIC | Modifier.PUBLIC).returnType(int.class)));
-            if (methodList.isEmpty())
-                throw new RuntimeException("CallConfirmationLimit method not found");
-            return methodList.get(0).getMethodInstance(loader);
-        });
-    }
-
-    public synchronized static Method loadAudioProximitySensorMethod(ClassLoader loader) throws Exception {
-        return UnobfuscatorCache.getInstance().getMethod(loader, () -> {
-            var method = findFirstMethodUsingStrings(loader, StringMatchType.Contains,
-                    "messageaudioplayer/onearproximity");
-            if (method == null)
-                throw new RuntimeException("ProximitySensor method not found");
-            return method;
-        });
-    }
-
-    public synchronized static Method loadGroupAdminMethod(ClassLoader loader) throws Exception {
-        return UnobfuscatorCache.getInstance().getMethod(loader, () -> {
-            var method = dexkit.findMethod(
-                    FindMethod.create().matcher(MethodMatcher.create().name("setupUsernameInGroupViewContainer")));
-            if (method.isEmpty())
-                throw new RuntimeException("GroupAdmin method not found");
-            return method.get(0).getMethodInstance(loader);
-        });
-    }
 
     public synchronized static Method loadJidFactory(ClassLoader loader) throws Exception {
         return UnobfuscatorCache.getInstance().getMethod(loader, () -> {
@@ -1911,13 +1897,19 @@ public class Unobfuscator {
         });
     }
 
-    public synchronized static Method loadPlaybackSpeed(ClassLoader classLoader) throws Exception {
+    public static Method loadPlaybackSpeed(ClassLoader classLoader) throws Exception {
         return UnobfuscatorCache.getInstance().getMethod(classLoader, () -> {
-            var method = findFirstMethodUsingStrings(classLoader, StringMatchType.Contains,
-                    "heroaudioplayer/setPlaybackSpeed");
-            if (method == null)
-                throw new RuntimeException("PlaybackSpeed method not found");
-            return method;
+            var method = findFirstMethodUsingStrings(classLoader, StringMatchType.Contains, "heroaudioplayer/setPlaybackSpeed");
+            if (method != null) return method;
+
+            var methodData = dexkit.findMethod(
+                    FindMethod.create().matcher(
+                            MethodMatcher.create().addUsingString("setPlaybackSpeed", StringMatchType.Equals).addUsingString("newSpeed")
+                    )
+            ).singleOrNull();
+
+            if (methodData == null) throw new RuntimeException("PlaybackSpeed method not found");
+            return methodData.getMethodInstance(classLoader);
         });
     }
 
@@ -2796,5 +2788,9 @@ public class Unobfuscator {
 
     public static Class<?> loadDialerProfilePictureLoader(ClassLoader classLoader) throws Exception {
         return UnobfuscatorCache.getInstance().getClass(classLoader, () -> findFirstClassUsingStrings(classLoader, StringMatchType.Contains, "DialerProfilePictureLoader/syncFetchProfilePhoto/onPhotoReceived"));
+    }
+
+    public static Class<?> loadBottomBarConfigClass(ClassLoader classLoader) throws Exception {
+        return UnobfuscatorCache.getInstance().getClass(classLoader, () -> findFirstClassUsingStrings(classLoader, StringMatchType.Contains, "BottomBarConfig("));
     }
 }
