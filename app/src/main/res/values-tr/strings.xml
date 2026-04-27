@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="force_restore_backup">Yedeklemeyi Zorla Geri Yükle</string>
+    <string name="force_restore_backup_summary">Yedek geri yükleme ekranını manuel olarak başlatın. Kurulum sırasında geri yüklemeyi atladıysanız bunu kullanın.</string>
     <string name="app_desc">WhatsApp Enhancer Modülü</string>
     <string name="antirevoke">Mesajların Silinmesini Engelle</string>
     <string name="antirevoke_sum">Mesajlar sizden silinmeyecektir</string>
@@ -30,6 +32,9 @@
     <string name="videoquality_sum">Videoları varsayılan olarak HD kalitesinde gönder</string>
     <string name="colors_customization">Renkleri özelleştir</string>
     <string name="colors_customization_sum">WhatsApp\'taki tüm renkleri değiştir (Sadece Koyu Temada çalışır)</string>
+    <string name="changecolor_mode">Renk Kaynağı</string>
+    <string name="changecolor_mode_manual">Renk Seçici</string>
+    <string name="changecolor_mode_monet">Otomatik (Monet, Android 12+)</string>
     <string name="general">Genel</string>
     <string name="restart_whatsapp">WhatsApp\'ı yeniden başlat</string>
     <string name="conversation">Sohbet ekranı</string>
@@ -225,6 +230,17 @@
     <string name="disable_default_emojis">Varsayılan Emojileri Devre Dışı Bırak</string>
     <string name="theme_mode">Wa Enhancer Karanlık Tema</string>
     <string name="theme_mode_sum">Wa Enhancer\'da bir tema modunu zorla</string>
+    <string name="wae_color_mode">WAE renk modu</string>
+    <string name="wae_color_preset">Önayar Rengi</string>
+    <string name="wae_color_mode_preset">Önayar</string>
+    <string name="wae_color_mode_auto_monet">Otomatik (Monet)</string>
+    <string name="color_preset_green">Yeşil</string>
+    <string name="color_preset_blue">Mavi</string>
+    <string name="color_preset_cyan">Camgöbeği</string>
+    <string name="color_preset_purple">Mor</string>
+    <string name="color_preset_orange">Turuncu</string>
+    <string name="color_preset_red">Kırmızı</string>
+    <string name="color_preset_pink">Pembe</string>
     <string name="disable_default_emojis_sum">WhatsApp\'ın varsayılan emojilerini devre dışı bırakır ve sistem emojilerini kullanır\n(NOT: WhatsApp emojileri seçiciden kaybolacak, eklemek için klavyeyi kullanın).</string>
     <string name="other">Diğer</string>
     <string name="enable_media_preview">Medya Önizlemeyi Etkinleştir</string>
@@ -283,6 +299,7 @@
     <string name="installation_desc">1. Cihazınızın rootlu olduğundan emin olun.\n2. Cihazınıza Xposed Framework\'ü yükleyin.\n3. Wa Enhancer\'ı Actions bölümünden indirin.\n4. Wa Enhancer APK\'sını yükleyin.\n5. Xposed Installer uygulamasında Wa Enhancer modülünü etkinleştirin.</string>
     <string name="go_to_telegram">Telegram\'a Git</string>
     <string name="go_to_github">GitHub\'a Git</string>
+    <string name="contributors">Katkıda Bulunanlar</string>
     <string name="support">Destek</string>
     <string name="support_desc">Wa Enhancer ile ilgili herhangi bir sorun yaşarsanız veya sorularınız varsa, lütfen Telegram\'ı ziyaret edin.</string>
     <string name="license">Lisans</string>
@@ -424,8 +441,39 @@
     <string name="block_unverified">Engelleme doğrulanmadı</string>
     <string name="disable_whatsapp_expiration">WhatsApp Sürüm Süresini Devre Dışı Bırak</string>
     <string name="disable_whatsapp_expiration_sum">Süresi dolmuş WhatsApp sürüm uyarısını devre dışı bırakır. (Not: Play Store\'dan güncelleme yapmak için bu ayarı elle kapatın veya LSposed üzerinden Play Store\'u işaretleyin)</string>
-    <string name="disable_ads">Reklamları Devre Dışı Bırak</string>
-    <string name="disable_ads_sum">WhatsApp\'ta reklamların görünmesini engeller</string>
     <string name="lockedchats_enhancer">Gelişmiş Kilitli Sohbetler</string>
     <string name="lockedchats_enhancer_sum">Bildirimleri ve kişileri rehberden gizleyerek kilitli sohbetleri iyileştir</string>
+    <string name="call_recording_title">Arama Kaydı</string>
+    <string name="call_recording_enable">Arama Kaydını Etkinleştir</string>
+    <string name="call_recording_enable_sum">Gelen ve giden aramaları (Ses ve &amp; Video) sesli olarak kaydet.</string>
+    <string name="call_recording_path">Kayıt Çıktı Klasörü</string>
+    <string name="video_call_screen_rec">Görüntülü Aramaları Kaydet (Ekran)</string>
+    <string name="video_call_screen_rec_locked">Çok yakında!</string>
+    <string name="coming_soon">Çok yakında!</string>
+    <string name="recording_mode">Kayıt Modu</string>
+    <string name="recording_mode_sum">Kaydedilecek aramaları seçin</string>
+    <string name="recording_mode_all">Tüm Aramaları Kaydet</string>
+    <string name="recording_mode_unknown">Sadece Bilinmeyen Numaraları Kaydet</string>
+    <string name="recording_mode_include">Yalnızca Seçili Kişileri Kaydet</string>
+    <string name="recording_mode_exclude">Seçilenler Dışında Tümünü Kaydet</string>
+    <string name="recording_included_contacts">Dahil Edilen Kişiler</string>
+    <string name="recording_excluded_contacts">Hariç Tutulan Kişiler</string>
+    <!-- Search Feature Strings -->
+    <string name="search_features_title">Arama Özellikleri</string>
+    <string name="search_features_hint">Herhangi bir özellik arayın...</string>
+    <string name="search_no_results">Özellik bulunamadı</string>
+    <string name="search_try_different_keywords">Farklı anahtar kelimeler deneyin veya kategorilere göz atın</string>
+    <string name="search_start_typing">Özellikleri aramak için yazmaya başlayın</string>
+    <string name="no_deleted_messages">Silinmiş mesaj bulunamadı</string>
+    <string name="deleted_messages_title">Sildiklerim</string>
+    <string name="restore_message">Geri yükle</string>
+    <string name="deleted_messages_sum">Başkalarının sildiği mesajları görüntüle</string>
+    <string name="restore_feature_title">Geri Yükleme Özelliği</string>
+    <string name="restore_feature_desc">"Çok yakında!"</string>
+    <string name="action_follow_developer">Çok yakında!</string>
+    <string name="enable_spy">Casus Aracını Etkinleştir</string>
+    <string name="enable_spy_sum">Hata ayıklama için dahili olayları Xposed günlüğüne kaydeder.</string>
+    <string name="warning_restore">Yedek geri yüklendiğinde, yedekleme sonrasındaki tüm mesajlar kaybolacaktır. Devam etmek istediğinize emin misiniz?</string>
+    <string name="force_restore_backup_experimental">Yedeği Zorla Geri Yükle (Deneysel)</string>
+    <string name="contact_probably_not_added">Kişi sizi eklememiş olabilir!</string>
 </resources>
