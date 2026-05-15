@@ -1,5 +1,6 @@
 [ADDED]
-* Added support to WA 2.26.15.xx
+* Added support to WA 2.26.18.xx
 
-[WAE]
-* Update translations from crowdin
+[FIXED]
+* Fixed error in the Download status notification
+
