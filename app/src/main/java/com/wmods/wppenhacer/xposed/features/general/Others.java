@@ -19,11 +19,11 @@ import com.wmods.wppenhacer.xposed.core.Feature;
 import com.wmods.wppenhacer.xposed.core.FeatureLoader;
 import com.wmods.wppenhacer.xposed.core.WppCore;
 import com.wmods.wppenhacer.xposed.core.components.FMessageWpp;
+import com.wmods.wppenhacer.xposed.core.components.SharedPreferencesWrapper;
 import com.wmods.wppenhacer.xposed.core.devkit.Unobfuscator;
 import com.wmods.wppenhacer.xposed.features.listeners.ConversationItemListener;
 import com.wmods.wppenhacer.xposed.utils.AnimationUtil;
 import com.wmods.wppenhacer.xposed.utils.ReflectionUtils;
-import com.wmods.wppenhacer.xposed.utils.SharedPreferencesWrapper;
 import com.wmods.wppenhacer.xposed.utils.Utils;
 
 import org.json.JSONObject;
@@ -186,7 +186,6 @@ public class Others extends Feature {
         propsInteger.put(8522, status_style);
         propsInteger.put(8521, status_style);
 
-
         hookProps();
         hookSearchbar(filterChats);
 
@@ -200,7 +199,6 @@ public class Others extends Feature {
                 XposedBridge.hookAllMethods(cls, "onSensorChanged", XC_MethodReplacement.DO_NOTHING);
             }
         }
-
 
         if (filter_items != null && prefs.getBoolean("custom_filters", true)) {
             filterItems(filter_items);
@@ -274,7 +272,6 @@ public class Others extends Feature {
         });
     }
 
-
     private void disablePhotoProfileStatus() throws Exception {
         var refreshStatusClass = Unobfuscator.loadRefreshStatusClass(classLoader);
         var photoProfileClass = Unobfuscator.findFirstClassUsingName(classLoader, StringMatchType.EndsWith, ".WDSProfilePhoto");
@@ -296,7 +293,6 @@ public class Others extends Feature {
                 field.set(param.thisObject, this.backup);
             }
         });
-
 
         XposedBridge.hookAllMethods(photoProfileClass, "setStatusIndicatorEnabled", new XC_MethodHook() {
             @Override
@@ -380,13 +376,11 @@ public class Others extends Feature {
         XposedBridge.hookMethod(stateChange, XC_MethodReplacement.DO_NOTHING);
     }
 
-
     private void doubleTapReaction() throws Exception {
 
         if (!prefs.getBoolean("doubletap2like", false)) return;
 
         var emoji = prefs.getString("doubletap2like_emoji", "👍");
-
 
         var conversationRowClass = Unobfuscator.loadConversationRowClass(classLoader);
 
@@ -500,7 +494,6 @@ public class Others extends Feature {
         });
     }
 
-
     private void sendAudioType(int audio_type) throws Exception {
         var sendAudioTypeMethod = Unobfuscator.loadSendAudioTypeMethod(classLoader);
         XposedBridge.hookMethod(sendAudioTypeMethod, new XC_MethodHook() {
@@ -514,7 +507,7 @@ public class Others extends Feature {
                 var mediaType = results.get(0);
                 var audioType = results.get(1);
                 if (mediaType.second != 2 && mediaType.second != 9) return;
-                param.args[audioType.first] = audio_type - 1; 
+                param.args[audioType.first] = audio_type - 1;
             }
         });
 
@@ -531,7 +524,6 @@ public class Others extends Feature {
         });
     }
 
-
     private void autoNextStatus() throws Exception {
         Class<?> StatusPlaybackContactFragmentClass = Unobfuscator.findFirstClassUsingName(classLoader, StringMatchType.EndsWith, "StatusPlaybackContactFragment");
         var runNextStatusMethod = Unobfuscator.loadNextStatusRunMethod(classLoader);
@@ -547,7 +539,6 @@ public class Others extends Feature {
         var onPlayBackFinished = Unobfuscator.loadOnPlaybackFinished(classLoader);
         XposedBridge.hookMethod(onPlayBackFinished, XC_MethodReplacement.DO_NOTHING);
     }
-
 
     private void disable_defEmojis() throws Exception {
         var defEmojiClass = Unobfuscator.loadDefEmojiClass(classLoader);
@@ -595,7 +586,6 @@ public class Others extends Feature {
             }
         });
     }
-
 
     private void hookProps() throws Exception {
         var methodPropsBoolean = Unobfuscator.loadPropsBooleanMethod(classLoader);
@@ -663,7 +653,6 @@ public class Others extends Feature {
             }
         } catch (Exception ignored) {
         }
-
 
         Method addSeachBar = Unobfuscator.loadAddOptionSearchBarMethod(classLoader);
         Field curPageField = Unobfuscator.loadGetCurrentPageInHomeField(classLoader);
