@@ -37,6 +37,7 @@ import com.wmods.wppenhacer.xposed.features.customization.HideTabs
 import com.wmods.wppenhacer.xposed.features.customization.IGStatus
 import com.wmods.wppenhacer.xposed.features.customization.SeparateGroup
 import com.wmods.wppenhacer.xposed.features.customization.ShowOnline
+import com.wmods.wppenhacer.xposed.features.general.AboutContactPicker
 import com.wmods.wppenhacer.xposed.features.general.AntiRevoke
 import com.wmods.wppenhacer.xposed.features.general.CallType
 import com.wmods.wppenhacer.xposed.features.general.ChatLimit
@@ -282,6 +283,7 @@ class FeatureLoader {
 
                     if (App.isOriginalPackage() && pref.getBoolean("update_check", true)) {
                         if (activity.javaClass.simpleName == "HomeActivity" && type == WppCore.ActivityChangeState.ChangeType.RESUMED) {
+                            if (pref.getBoolean("lite_mode",false)) return
                             activity.window.decorView.postDelayed({
                                 CompletableFuture.runAsync(UpdateChecker(activity))
                             }, 2000)
@@ -463,7 +465,8 @@ class FeatureLoader {
                 CallRecording::class.java,
                 BackupRestore::class.java,
                 RecoverDeleteForMe::class.java,
-                JumpFirstMessage::class.java
+                JumpFirstMessage::class.java,
+                AboutContactPicker::class.java
             )
 
             XposedBridge.log("Loading Plugins")

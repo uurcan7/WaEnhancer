@@ -1,6 +1,2 @@
-[ADDED]
-* Added support to WA 2.26.18.xx
-
 [FIXED]
-* Fixed error in the Download status notification
-
+* Fixed missing WA Settings icon
