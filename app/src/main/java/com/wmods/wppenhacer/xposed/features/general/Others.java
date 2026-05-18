@@ -23,6 +23,7 @@ import com.wmods.wppenhacer.xposed.core.devkit.Unobfuscator;
 import com.wmods.wppenhacer.xposed.features.listeners.ConversationItemListener;
 import com.wmods.wppenhacer.xposed.utils.AnimationUtil;
 import com.wmods.wppenhacer.xposed.utils.ReflectionUtils;
+import com.wmods.wppenhacer.xposed.utils.SharedPreferencesWrapper;
 import com.wmods.wppenhacer.xposed.utils.Utils;
 
 import org.json.JSONObject;
@@ -56,8 +57,6 @@ public class Others extends Feature {
 
     @Override
     public void doHook() throws Exception {
-
-        // receivedIncomingTimestamp
 
         properties = Utils.getProperties(prefs, "custom_css", "custom_filters");
 
@@ -98,79 +97,65 @@ public class Others extends Feature {
                 return value;
             });
         }
-        propsBoolean.put(21632, newSettings); // For enable Toolbar button
+        propsBoolean.put(21632, newSettings);
         propsBoolean.put(14862, newSettings);
         propsInteger.put(18564, newSettings ? 2 : 0);
 
         propsBoolean.put(2889, floatingMenu);
 
-        // new text composer
         propsBoolean.put(15708, true);
 
-        // change page id
         propsBoolean.put(2358, false);
 
-        // disable contact filter
         propsBoolean.put(7769, false);
 
-        // disable new Media Picker
         propsBoolean.put(9286, false);
 
-        // Instant Video
         propsBoolean.put(3354, true);
         propsBoolean.put(5418, true);
         propsBoolean.put(9051, true);
 
-        // disable new toolbar
         propsBoolean.put(11824, false);
         propsBoolean.put(6481, false);
 
-        // Enable music in Stories
         propsBoolean.put(13591, true);
         propsBoolean.put(10024, true);
 
-        // show all status
         propsBoolean.put(6798, true);
 
-        // auto play emojis settings
         propsBoolean.put(3575, animationEmojis);
         propsBoolean.put(9757, animationEmojis);
 
-        // emojis maps
         propsBoolean.put(10639, animationEmojis);
         propsBoolean.put(12495, animationEmojis);
         propsBoolean.put(11066, animationEmojis);
 
-        propsBoolean.put(7589, true);  // Media select quality
-        propsBoolean.put(6972, false); // Media select quality
-        propsBoolean.put(5625, true);  // Enable option to autodelete channels media
+        propsBoolean.put(7589, true);
+        propsBoolean.put(6972, false);
+        propsBoolean.put(5625, true);
 
-        propsBoolean.put(8643, true);  // Enable TextStatusComposerActivityV2
-//        propsBoolean.put(3403, true);  // Enable Sticker Suggestion
-        propsBoolean.put(8607, true);  // Enable Dialer keyboard
-        propsBoolean.put(9578, true);  // Enable Privacy Checkup
-        propsInteger.put(8135, 2);  // Call Filters
+        propsBoolean.put(8643, true);
 
-        // Enable Translate Message
+        propsBoolean.put(8607, true);
+        propsBoolean.put(9578, true);
+        propsInteger.put(8135, 2);
+
         propsBoolean.put(9141, true);
         propsBoolean.put(8925, true);
 
-        propsBoolean.put(10380, false); // fix crash bug in Settings/Archived
+        propsBoolean.put(10380, false);
 
-        propsBoolean.put(0x34b9, true); // Enable Select People in call
-        propsBoolean.put(0x351c, true); // Enable new colors style in Text Composer
+        propsBoolean.put(0x34b9, true);
+        propsBoolean.put(0x351c, true);
 
-        // Enable show count until viewed
         propsBoolean.put(0x2289, true);
         propsBoolean.put(0x373f, true);
 
-        // add yours in stories
         propsBoolean.put(0x2ce2, true);
         propsBoolean.put(0x2ce3, true);
 
-        propsBoolean.put(0x345a, true); // new edit profile name
+        propsBoolean.put(0x345a, true);
 
-        // new stories selection
         propsBoolean.put(0x32ca, true);
         propsBoolean.put(0x32cb, true);
 
@@ -193,7 +178,6 @@ public class Others extends Feature {
             Others.propsBoolean.put(13949, true);
         }
 
-        // Whatsapp Status Style
         var retStatusStyle = Unobfuscator.loadStatusStyleMethod(classLoader);
         XposedBridge.hookMethod(retStatusStyle, XC_MethodReplacement.returnConstant(status_style));
         status_style = oldStatus ? 0 : status_style;
@@ -530,7 +514,7 @@ public class Others extends Feature {
                 var mediaType = results.get(0);
                 var audioType = results.get(1);
                 if (mediaType.second != 2 && mediaType.second != 9) return;
-                param.args[audioType.first] = audio_type - 1; // 1 = voice notes || 0 = audio voice
+                param.args[audioType.first] = audio_type - 1; 
             }
         });
 
@@ -625,7 +609,6 @@ public class Others extends Feature {
 
                 var propValue = propsBoolean.get(i);
                 if (propValue != null) {
-                    // Fix Bug in Settings Data Usage
                     if (i == 4023) {
                         if (ReflectionUtils.isCalledFromClass(dataUsageActivityClass)) return;
                     }
